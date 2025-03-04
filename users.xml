@@ -1,0 +1,12 @@
+<!-- BaseX internal access for user "admin", password is "password"-->
+<users>
+  <user name="admin" permission="admin">
+    <password algorithm="digest">
+      <hash>1362341e2a498e998e8ca9f2bba300ee</hash>
+    </password>
+    <password algorithm="salted-sha256">
+      <salt>39970021834881</salt>
+      <hash>9885e6e2f8d1b1537d77f33274ef37865eccee452cee4374336b84420ce72cd8</hash>
+    </password>
+  </user>
+</users>

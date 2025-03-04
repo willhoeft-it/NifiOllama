@@ -1,0 +1,4 @@
+data/models
+data/id_*
+work/*.jpg
+work/*.png

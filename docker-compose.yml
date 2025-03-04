@@ -1,0 +1,103 @@
+services:
+ ollama:
+   # CPU-only. For Nvidia or AMD GPU support, see specific images at: https://hub.docker.com/r/ollama/ollama
+   image: ollama/ollama:0.5.12
+   ports:
+     # only needed for tests to the chat api from outside docker
+     # - 11434:11434
+   environment:
+     # allow unauthenticated (!) api access from everywhere. Only needed for testing from outside docker. Also open port (above)
+     # OLLAMA_HOST: 0.0.0.0
+   restart: unless-stopped
+   volumes:
+     # explicitly store the (huge) model data in a dedicated (external) folder
+     - ./data:/root/.ollama
+   networks:
+     - backend_net
+
+#  ollama:
+#    # This alternative Ollama container is for Intel iGPU / Arc. Sadly no support for Intel NPU under Linux, yet.
+#    # This requires appropriate current Intel OpenCL drivers loaded. Check if "clinfo" on the host reports the Intel Arc GPU.
+#    image: intelanalytics/ipex-llm-inference-cpp-xpu:latest
+#    devices:
+#      - /dev/dri
+#    volumes:
+#      - ./data:/root/.ollama
+#    environment:
+#      - no_proxy=localhost,127.0.0.1
+#      - OLLAMA_HOST=0.0.0.0
+#      - DEVICE=iGPU
+#      - OLLAMA_INTEL_GPU=true
+#      - memory=32G
+#      - HOSTNAME=intel-llm
+#      - OLLAMA_NUM_GPU=999
+#      - ZES_ENABLE_SYSMAN=1
+#    restart: unless-stopped
+#    command: sh -c 'mkdir -p /llm/ollama && cd /llm/ollama && init-ollama && exec ./ollama serve'
+#    networks:
+#      - backend_net
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      - 3333:8080
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+    restart: unless-stopped
+    volumes:
+      - open-webui:/app/backend/data
+    networks:
+      - backend_net
+      - frontend_net
+
+  basex:
+    image: quodatum/basexhttp:basex-11.3
+    networks:
+      - backend_net
+    restart: unless-stopped
+    ports:
+      # only needed for tests from outside docker
+      - 8884:8080
+    volumes:
+      - basex_data:/srv/basex/data
+      # Sets a default admin user
+      - ./users.xml:/srv/basex/data/users.xml
+
+  nifi:
+    image: apache/nifi:2.2.0
+    ports:
+     # nifi image does not configure unencrypted port 8000
+     - 8443:8443   # changing external port requires setting NIFI_WEB_PROXY_HOST and/or NIFI_WEB_PROXY_CONTEXT_PATH?
+     # also see https://stackoverflow.com/questions/49092230/nifi-ui-not-accessible-when-started-from-docker-compose
+    environment:
+      SINGLE_USER_CREDENTIALS_USERNAME: admin
+      SINGLE_USER_CREDENTIALS_PASSWORD: adminpassword # 12 chars minimum
+      NIFI_JVM_HEAP_INIT: 1g
+      NIFI_JVM_HEAP_MAX: 2g
+    restart: unless-stopped
+    volumes:
+      # /opt/nifi should actually include all, but data doesn't survive a "compose down". We now rely on the dockerfile's VOLUME declaration with all explicit sub folders.
+      - nifi:/opt/nifi/nifi-current/logs
+      - nifi:/opt/nifi/nifi-current/conf
+      - nifi:/opt/nifi/nifi-current/database_repository
+      - nifi:/opt/nifi/nifi-current/flowfile_repository
+      - nifi:/opt/nifi/nifi-current/content_repository
+      - nifi:/opt/nifi/nifi-current/provenance_repository
+      - nifi:/opt/nifi/nifi-current/python_extensions
+      - nifi:/opt/nifi/nifi-current/nar_extensions
+      - nifi:/opt/nifi/nifi-current/state
+      # Provide access to to be processed files
+      - ./work:/var/work
+    networks:
+      - backend_net
+      - frontend_net
+
+volumes:
+  open-webui:
+  nifi:
+  basex_data:
+
+networks:
+  backend_net:
+  frontend_net:
+    driver: bridge
