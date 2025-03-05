@@ -16,7 +16,7 @@ docker compose up -d
 
 After docker downloaded the image files and started up the containers, open Open WebUI in your browser at http://localhost:3333 . Except for the model administration using WebUI is purely optional for our showcase, but it’s a useful (and fun!) way to experiment and track your models.
 
-On your first access, you’ll need to create an account. Don’t worry—everything is stored locally on your machine.
+On your first access, you’ll need to create an account. Don’t worry — everything is stored locally on your machine.
 
 First, we need to download a language model. Since the model is about 4.4 GB, the download may take some time.
 
@@ -63,13 +63,12 @@ While you can use WebUI to analyze images and manually copy-paste results into a
 ![create process group](images/process_group_1.png)
 
 1. Upload the prepared process group file ```AI_Catalogue_Image_Files.json``` and click "Add":
-
 ![upload process group](images/process_group_2.png)
 
 1. Since the imported file does not contain sensitive parameters, set the database password in a "Parameter Context" as follows:
-1. Right-click the new process group "**AI_Catalogue_Image_Files**", select "**Parameters**" and edit the "**basex_password**" parameter:
+* Right-click the new process group "**AI_Catalogue_Image_Files**", select "**Parameters**" and edit the "**basex_password**" parameter:
 ![alt text](images/process_group_6.png)
-1. Set the value to "**password**"
+* Set the value to "**password**"
 
 ### Start the Process Group
 
@@ -90,7 +89,7 @@ All process boxes should now show a green "play" icon, except the first "ListFil
 
 ![Run Once](images/process_group_5.png)
 
-After a while, the process group should have processed all your images and written a document for each of them to the database. The number of in the last queue should equal the number of files you put in the work folder. In this case there were only three:
+After a while, the process group should have processed all your images and written a document for each of them to the database. The number of flows in the last queue should equal the number of files you put in the work folder. In this case there were only three:
 
 ![three files finished](images/process_group_7.png)
 
@@ -102,7 +101,7 @@ In BaseX DBA, you can now view the generated XML documents:
 
 ![alt text](images/basex_2.png)
 
-Our process didn’t just copy the description from LlavA — it also extracted structured keywords and technical file metadata such as timestamps, file sizes, and MD5 hashes. These attributes help track file changes or detect duplicates. We also store details about the language model used, allowing us to add data from additional LLMs in the future.
+Our process didn’t just copy the description from Llava — it also extracted structured keywords and technical file metadata such as timestamps, file sizes, and MD5 hashes. These attributes help track file changes or detect duplicates. We also store details about the language model used, allowing us to add data from additional LLMs in the future.
 
 One of the first process steps in our NiFi process group is to filter the file names against the already known files in the database, so they will not be processed twice. You can select and delete documents here in BaseX, so they will be generated again.
 
