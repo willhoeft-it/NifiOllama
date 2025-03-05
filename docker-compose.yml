@@ -1,11 +1,11 @@
 services:
- ollama:
+  ollama:
    # CPU-only. For Nvidia or AMD GPU support, see specific images at: https://hub.docker.com/r/ollama/ollama
    image: ollama/ollama:0.5.12
-   ports:
+   # ports:
      # only needed for tests to the chat api from outside docker
      # - 11434:11434
-   environment:
+   # environment:
      # allow unauthenticated (!) api access from everywhere. Only needed for testing from outside docker. Also open port (above)
      # OLLAMA_HOST: 0.0.0.0
    restart: unless-stopped
